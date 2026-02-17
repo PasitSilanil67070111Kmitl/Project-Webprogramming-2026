@@ -1,0 +1,29 @@
+body {
+    background-color: #f0f0f0;
+    font-family: Arial;
+    text-align: center;
+}
+
+h2 {
+    color: black;
+}
+
+form {
+    background-color: white;
+    width: 300px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid black;
+}
+
+input {
+    width: 90%;
+    margin: 5px;
+    padding: 5px;
+}
+
+.btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+}
