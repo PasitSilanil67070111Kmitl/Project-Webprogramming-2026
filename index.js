@@ -30,8 +30,11 @@ app.post('/signin', (req, res) => {
     const { userinput, password } = req.body;
 
     const sql = `
-        SELECT * FROM users 
-        WHERE name = ? OR email = ?
+        SELECT users.*, employees.email
+FROM users
+JOIN employees ON users.employee_id = employees.employee_id
+WHERE employees.email = ? OR employees.first_name = ?
+
     `;
 
     conn.query(sql, [userinput, userinput], (err, results) => {
@@ -57,6 +60,68 @@ app.post('/signin', (req, res) => {
 
 });
 
+app.get('/add-employee', (req, res) => {
+    res.render('add_employee');
+});
+
+// รับค่าจาก form
+app.post('/add-employee', (req, res) => {
+    const {
+        first_name,
+        last_name,
+        date_of_birth,
+        gender,
+        phone,
+        email,
+        address,
+        hire_date
+    } = req.body;
+
+    const sql = `
+        INSERT INTO employees 
+        (first_name, last_name, date_of_birth, gender, phone, email, address, hire_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    conn.query(sql,
+        [first_name, last_name, date_of_birth, gender, phone, email, address, hire_date],
+        (err, result) => {
+            if (err) throw err;
+            res.send("Employee added successfully!");
+        }
+    );
+});
+app.get('/admin/users', (req, res) => {
+
+    const sql = `
+        SELECT 
+            users.user_id,
+            users.role,
+            employees.first_name,
+            employees.last_name,
+            employees.email
+        FROM users
+        LEFT JOIN employees 
+        ON users.employee_id = employees.employee_id
+    `;
+
+    conn.query(sql, (err, users) => {
+        if (err) throw err;
+        res.render('admin_users', { users });
+    });
+});
+
+// อัปเดต role
+app.post('/admin/update-role', (req, res) => {
+    const { user_id, role } = req.body;
+
+    const sql = "UPDATE users SET role = ? WHERE user_id = ?";
+
+    conn.query(sql, [role, user_id], (err) => {
+        if (err) throw err;
+        res.redirect('/admin/users');
+    });
+});
 
 app.listen(port, () => {
     console.log(`listening to port ${port}`);
