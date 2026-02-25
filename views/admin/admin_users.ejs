@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WMS - Admin</title>
+    <link rel="stylesheet" href="/css/wms.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <h3>WMS</h3>
+    <a href="/">Dashboard</a>
+    <a href="/admin/users">Manage Users</a>
+    <a href="/add-employee">Add Employee</a>
+    <a href="/login">Logout</a>
+</div>
+
+<div class="main">
+
+    <div class="navbar">
+        Admin Panel
+    </div>
+
+    <div class="container">
+
+        <h2>User Management</h2>
+
+        <table>
+            <tr>
+                <th>Employee Code</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Current Role</th>
+                <th>Change Role</th>
+            </tr>
+
+            <% users.forEach(user=> { %>
+                <tr>
+                    <td>
+                        <%= user.employee_code %>
+                    </td>
+                    <td>
+                        <%= user.first_name %>
+                            <%= user.last_name %>
+                    </td>
+
+                    <td>
+                        <%= user.email %>
+                    </td>
+
+                    <td>
+                        <span class="badge <%= user.role_name %>">
+                            <%= user.role_name %>
+                        </span>
+                    </td>
+
+                    <td>
+                        <form action="/admin/update-role" method="POST">
+                            <input type="hidden" name="user_id" value="<%= user.user_id %>">
+
+                            <select name="role_id">
+                                <% roles.forEach(role=> { %>
+                                    <option value="<%= role.role_id %>" <%=user.role_id===role.role_id ? 'selected' : ''
+                                        %>>
+                                        <%= role.role_name %>
+                                    </option>
+                                    <% }) %>
+                            </select>
+
+                            <button type="submit">Update</button>
+                        </form>
+
+                    </td>
+                </tr>
+                <% }) %>
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>

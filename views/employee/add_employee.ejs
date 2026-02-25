@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WMS - Add Employee</title>
+    <link rel="stylesheet" href="/css/wms.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <h3>WMS</h3>
+    <a href="/">Dashboard</a>
+    <a href="/admin/users">Manage Users</a>
+    <a href="/add-employee">Add Employee</a>
+    <a href="/login">Logout</a>
+</div>
+
+<div class="main">
+
+    <div class="navbar">
+        Add New Employee
+    </div>
+
+    <div class="container">
+
+        <form action="/add-employee" method="POST">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" name="first_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" name="last_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" name="date_of_birth">
+                </div>
+
+                <div class="form-group">
+                    <label>Gender</label>
+                    <select name="gender">
+                        <option value="">Select</option>
+                        <option>Male</option>
+                        <option>Female</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" name="phone">
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email">
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Address</label>
+                    <textarea name="address" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Hire Date</label>
+                    <input type="date" name="hire_date">
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="primary-btn">
+                    Save Employee
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>
