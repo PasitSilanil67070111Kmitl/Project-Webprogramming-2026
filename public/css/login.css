@@ -14,16 +14,22 @@ body {
 
 .login-card {
     background: white;
-    padding: 40px;
-    width: 350px;
+    width: 480px;
     border-radius: 14px;
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.form-container {
+    padding: 40px;
 }
 
 .login-card h2 {
+    line-height: 0%;
     text-align: center;
     margin-bottom: 25px;
     color: #1f2d3d;
+    margin-bottom: 50px;
 }
 
 .form-group {
@@ -33,31 +39,43 @@ body {
 }
 
 .form-group label {
-    font-size: 14px;
+    font-size: 16px;
     margin-bottom: 5px;
     font-weight: 600;
 }
 
 .form-group input {
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
+    font-size: 14px;
+    width: 100%;
+    padding: 12px;
+    padding-left: 30px;
+    border: none;
+    border-bottom: 1px solid #ccc;
 }
 
 .form-group input:focus {
     outline: none;
-    border-color: #2e86de;
+    border-color: #1482db;
+}
+
+.input-login .bx-user, .bx-lock {
+    position: absolute;
+    font-size: 24px;
+    padding: 10px 2px;
 }
 
 .login-btn {
+    font-size: 16px;
     width: 100%;
-    padding: 10px;
-    background-color: #2e86de;
+    padding: 20px;
+    background-color: #1482db;
     border: none;
     color: white;
     border-radius: 8px;
     font-weight: bold;
     cursor: pointer;
+    margin-top: 50px;
+    transition: 0.2s;
 }
 
 .login-btn:hover {
@@ -65,9 +83,18 @@ body {
 }
 
 .system-title {
+    line-height: 0;
+    display: block;
+    justify-content: center;
     text-align: center;
     color: white;
-    font-size: 24px;
+    font-size: 30px;
     font-weight: bold;
-    margin-bottom: 20px;
+    background-color: #1482db;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.system-title h3 {
+    color: #3d4f66;
 }
