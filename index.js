@@ -17,7 +17,6 @@ app.get('/', (req, res) => {
     res.render('home');
 });
 
-
 // routing 
 
 app.get('/login', (req, res) => {
@@ -174,8 +173,6 @@ JOIN roles ON users.role_id = roles.role_id
     });
 
 });
-
-
 
 // อัปเดต role
 app.post('/admin/update-role', (req, res) => {
