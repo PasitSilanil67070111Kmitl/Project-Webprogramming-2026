@@ -4,7 +4,13 @@ const conn = require('../database');
 
 // หน้า login
 router.get('/login', (req, res) => {
-    res.render('login');
+
+    if (req.session.user) {
+        return res.redirect('/');
+    }
+
+    res.render('login', { layout: false });
+
 });
 
 // login
@@ -55,6 +61,9 @@ router.get('/logout', (req, res) => {
         if (err) {
             return res.send("Logout Error");
         }
+
+        // ลบ session cookie
+        res.clearCookie('connect.sid');
 
         res.redirect('/login');
 

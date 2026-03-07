@@ -27,6 +27,12 @@ app.use(session({
     saveUninitialized: false
 }));
 
+// ป้องกัน browser cache
+app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    next();
+});
+
 // global variables
 app.use((req, res, next) => {
     res.locals.activePage = '';
@@ -34,8 +40,11 @@ app.use((req, res, next) => {
     next();
 });
 
+// middleware
+const { isLoggedIn } = require('./middleware/authMiddleware');
+
 // home
-app.get('/', (req, res) => {
+app.get('/', isLoggedIn, (req, res) => {
     res.render('home');
 });
 

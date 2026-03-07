@@ -4,7 +4,6 @@ const conn = require('../database');
 
 const { isAdmin } = require('../middleware/authMiddleware');
 
-// ป้องกันทุก route ใน admin
 router.use(isAdmin);
 
 router.get('/users', (req, res) => {
