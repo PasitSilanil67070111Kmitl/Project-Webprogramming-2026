@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const conn = require('../database');
 
-// =============================
-// แสดงหน้า users
-// =============================
+const { isAdmin } = require('../middleware/authMiddleware');
+
+// ป้องกันทุก route ใน admin
+router.use(isAdmin);
+
 router.get('/users', (req, res) => {
 
     const sql = `
@@ -19,27 +21,12 @@ router.get('/users', (req, res) => {
 
     conn.query(sql, (err, users) => {
 
-        if (err) {
-            console.error(err);
-            return res.send("Error loading users");
-        }
-
         conn.query(`
         SELECT * FROM employees
         WHERE employee_id NOT IN (SELECT employee_id FROM users)
         `, (err, employees) => {
 
-            if (err) {
-                console.error(err);
-                return res.send("Error loading employees");
-            }
-
             conn.query("SELECT * FROM roles", (err, roles) => {
-
-                if (err) {
-                    console.error(err);
-                    return res.send("Error loading roles");
-                }
 
                 res.render('admin/admin_users', {
                     users,
@@ -55,40 +42,12 @@ router.get('/users', (req, res) => {
     });
 
 });
-
-
-// =============================
-// อัปเดต role
-// =============================
-router.post('/update-role', (req, res) => {
-
-    const { user_id, role_id } = req.body;
-
-    const sql = `
-    UPDATE users
-    SET role_id = ?
-    WHERE user_id = ?
-    `;
-
-    conn.query(sql, [role_id, user_id], (err) => {
-
-        if (err) {
-            console.error(err);
-            return res.send("Error updating role");
-        }
-
-        res.redirect('/admin/users');
-    });
-
-});
-
-
-// =============================
-// สร้าง user
-// =============================
 router.post('/create-user', (req, res) => {
 
-    const { employee_id, password, role_id } = req.body;
+    const { employee_id, role_id } = req.body;
+
+    // สุ่ม password 6 ตัว
+    const password = Math.random().toString(36).slice(-6);
 
     const sql = `
     INSERT INTO users (employee_id, role_id, password)
@@ -102,31 +61,15 @@ router.post('/create-user', (req, res) => {
             return res.send("Error creating user");
         }
 
-        res.redirect('/admin/users');
+        console.log("Generated password:", password);
+
+        res.send(`
+            <h2>User Created</h2>
+            <p>Password: <b>${password}</b></p>
+            <a href="/admin/users">Back</a>
+        `);
+
     });
 
 });
-
-
-// =============================
-// ลบ user
-// =============================
-router.post('/delete-user', (req, res) => {
-
-    const { user_id } = req.body;
-
-    const sql = "DELETE FROM users WHERE user_id = ?";
-
-    conn.query(sql, [user_id], (err) => {
-
-        if (err) {
-            console.error(err);
-            return res.send("Error deleting user");
-        }
-
-        res.redirect('/admin/users');
-    });
-
-});
-
 module.exports = router;
