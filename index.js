@@ -8,6 +8,7 @@ const session = require('express-session');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const employeeRoutes = require('./routes/employee');
+const productsRoutes = require('./routes/products');
 
 // static files
 app.use(express.static('public'));
@@ -52,6 +53,7 @@ app.get('/', isLoggedIn, (req, res) => {
 app.use('/', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/', employeeRoutes);
+app.use('/', productsRoutes);
 
 // start server
 app.listen(port, () => {

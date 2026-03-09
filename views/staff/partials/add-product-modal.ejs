@@ -1,0 +1,46 @@
+                <div id="addModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-head">
+                            <h2>เพิ่มสินค้าใหม่</h2>
+                            <span class="close-add">&times;</span>
+                        </div>
+                        <form action="/add-product" method="POST">
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label>ชื่อสินค้า</label>
+                                    <input type="text" name="product_name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>รหัสสินค้า</label>
+                                    <input type="text" name="sku" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>หมวดหมู่</label>
+                                    <select name="category_id">
+                                        <option value="">-- เลือกประเภทสินค้า --</option>
+                                        <% allCategories.forEach(function(cat) { %>
+                                            <option value="<%= cat.id %>">
+                                                <%= cat.category_name %>
+                                            </option>
+                                        <% }); %>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Description</label>
+                                    <textarea name="description" rows="8"></textarea>
+                                </div>
+                                <div class="form-group-grid">
+                                    <div class="form-group">
+                                        <label>จำนวน</label>
+                                        <input type="number" name="stock_quantity" placeholder="0" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>ราคา</label>
+                                        <input type="number" name="price" step="0.01" placeholder="0.00" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn-submit">บันทึก</button>
+                            </div>
+                        </form>   
+                    </div>
+                </div>

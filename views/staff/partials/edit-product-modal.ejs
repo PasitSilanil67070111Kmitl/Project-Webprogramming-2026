@@ -1,0 +1,37 @@
+                <div id="editModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-head">
+                            <h2>อัปเดตข้อมูลสินค้า</h2>
+                            <span class="close-edit">&times;</span>
+                        </div>
+                        <form action="/update-product" method="POST">
+                            <div class="modal-body">
+                                <input type="hidden" name="id" id="edit-id"> 
+                                <input type="hidden" name="name" id="edit-name">
+                                <input type="hidden" name="sku" id="edit-sku">
+                                
+                                <div class="form-group">
+                                <label>ประเภทรายการ:</label>
+                                <select name="action" id="action-select">
+                                    <option value="add_stock">เพิ่มสต็อก (+)</option>
+                                    <option value="withdraw">เบิกสินค้า (-)</option>
+                                    <option value="update_info">ปรับปรุงราคา/ข้อมูล</option>
+                                </select>
+                                </div>
+                                <div id="quantity-section" class="form-group">
+                                    <label>จำนวนที่ปรับปรุง:</label>
+                                    <input type="number" name="quantity_change" value="0">
+                                </div>
+                                <div id="price-section" style="display: none;" class="form-group">
+                                    <label>ราคาปัจจุบัน:</label>
+                                    <input type="number" name="price" placeholder="0.00" step="0.01" value="">
+                                </div>
+                                <div class="form-group">
+                                    <label>หมายเหตุ/รายละเอียด:</label>
+                                    <textarea name="detail" placeholder="ระบุเหตุผลการเบิกหรือที่มาของสินค้า" rows="8"></textarea>
+                                </div>
+                                <button type="submit" class="btn-submit">ยืนยันรายการ</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>

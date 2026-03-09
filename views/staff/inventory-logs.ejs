@@ -1,0 +1,86 @@
+        <div class="head-container">
+            <i class="bx bx-history"></i>
+            <h2>Inventory Logs</h2>
+        </div>
+        <div class="main-container">
+            <h2>Inventory Logs List</h2>
+            <div class="head">
+                <form action="/inventory" method="GET" class="from-searchbar">
+                    <div class="searchbar">
+                        <i class="bx bx-search"></i>
+                        <input type="text" name="query" placeholder="ระบุคำที่ต้องการค้นหา">
+                        <button type="submit">ค้นหา</button>
+                    </div>
+                </form>
+            </div>
+            <hr>
+            <div class="logs-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="10%">Date-Time</th>
+                            <th width="10%">SKU</th>
+                            <th>Product Name</th>
+                            <th width="10%">Action</th>
+                            <th width="10%">Stock Changed</th>
+                            <th width="10%">Price Changed</th>
+                            <th width="10%">Detail</th>
+                            <th width="10%">By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (logs && logs.length > 0) { %>
+                            <% logs.forEach(function(log) { %>
+                            <tr>
+                                <td><%= log.created_at.toLocaleString('th-TH') %></td>
+                                <td><%= log.sku %></td>
+                                <td><%= log.product_name %></td>
+                                <td>
+                                    <% 
+                                        let badgeClass = '';
+                                        if (log.action === 'เพิ่มสินค้า') badgeClass = 'green';
+                                        else if (log.action === 'เบิกสินค้า') badgeClass = 'red';
+                                        else if (log.action === 'เพิ่มสต็อกสินค้า') badgeClass = 'blue'
+                                        else if (log.action === 'ปรับปรุงข้อมูล') badgeClass = 'orange';
+                                    %>
+                                    <span class="badge <%= badgeClass %>">
+                                        <%= log.action %>
+                                    </span>
+                                </td>
+                                <% 
+                                    let prefix = ''; 
+                                    // กำหนดเครื่องหมายตามประเภทของ Action
+                                    if (log.action.includes('เพิ่ม')) {
+                                        prefix = '+'; 
+                                    } else if (log.action.includes('เบิก')) {
+                                        prefix = '-'; 
+                                    } else {
+                                        prefix = ''; // กรณีปรับปรุงข้อมูลหรืออื่นๆ ให้เป็นค่าว่าง
+                                    }
+
+                                    // ตรวจสอบว่าถ้าจำนวนเป็น 0 ไม่ต้องแสดงเครื่องหมาย
+                                    if (log.stock_quantity === 0) {
+                                        prefix = '';
+                                    }
+                                %>
+                                <td style="text-align: center;">
+                                    <%= prefix %><%= Math.abs(log.stock_quantity) %>
+                                </td>
+                                <td>
+                                    <%= Number(log.price).toLocaleString('en-US', { minimumFractionDigits: 2 }) %>
+                                </td>
+                                <td><small><%= log.detail %></small></td>
+                                <td><%= log.changed_by %></td>
+                            </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="7" class="empty-msg" style="text-align: center; padding: 20px;">
+                                    ไม่พบบันทึกในระบบ
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>

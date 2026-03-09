@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/staff.css">
+    <link href="https://cdn.boxicons.com/3.0.8/fonts/basic/boxicons.min.css" rel="stylesheet">
+    <title>WMS</title>
+</head>
+<body>
+    <nav id="sidebar">
+        <ul>
+            <li class="logo">
+                <h1>WMS</h1>
+            </li>
+            <li class="<%= activePage === 'home' ? 'active' : '' %>">
+                <a href="/home">
+                    <i class="bx bx-home-alt-2"></i>
+                    <span>Home</span>
+                </a>
+            </li>
+            <li class="<%= activePage === 'inventory' ? 'active' : '' %>">
+                <a href="/inventory">
+                    <i class="bx bx-package"></i>
+                    <span>Inventory</span>
+                </a>
+            </li>
+            <li class="<%= activePage === 'inventory-logs' ? 'active' : '' %>">
+                <a href="/inventory-logs">
+                    <i class="bx bx-history"></i>
+                    <span>Inventory Logs</span>
+                </a>
+            </li>
+        </ul>
+        <ul>
+            <li class="logout">
+                <a href="/login">
+                    <i class="bx bx-arrow-out-left-square-half"></i>
+                    <span>Log out</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <main>
+        <%- body %>
+    </main>
+    <script src="/js/modal.js"></script>
+</body>
+</html>

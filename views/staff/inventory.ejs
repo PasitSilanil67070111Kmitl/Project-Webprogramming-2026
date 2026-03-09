@@ -1,0 +1,70 @@
+        <div class="head-container">
+            <i class="bx bx-package"></i>
+            <h2>Inventory</h2>
+        </div>
+        <div class="main-container">
+            <h2>Products list</h2>
+            <div class="head">
+                <form action="/inventory" method="GET" class="from-searchbar">
+                    <div class="searchbar">
+                        <i class="bx bx-search"></i>
+                        <input type="text" name="query" placeholder="ระบุคำที่ต้องการค้นหา">
+                        <button type="submit">ค้นหา</button>
+                    </div>
+                </form>
+                <button id="openAddModalBtn" class="primary-btn">
+                    <i class="bx bx-plus"></i>
+                    <span>Add Product</span>
+                </button>
+
+                <!-- Modal สำหรับเพิ่มสินค้า  -->
+                <%- include('partials/add-product-modal') %>
+
+                <!-- Modal สำหรับแก้ไขสินค้า-->
+                <%- include('partials/edit-product-modal') %>
+
+            </div>
+            <hr>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="5%">ID</th>
+                            <th width="10%">SKU</th>
+                            <th>Product Name</th>
+                            <th width="10%">Category</th>
+                            <th width="10%">Quantity</th>
+                            <th width="10%">Price</th>
+                            <th width="10%"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (allProducts && allProducts.length > 0) { %>
+                        <% allProducts.forEach(function(product) { %>
+                        <tr>
+                            <td><%= product.id  %></td>
+                            <td><%= product.sku %></td>
+                            <td><%= product.product_name %></td>
+                            <td><%= product.category_name %></td>
+                            <td><%= product.stock_quantity %></td>
+                            <td><%= Number(product.price).toLocaleString('en-US', { minimumFractionDigits: 2 }) %></td>
+                            <td>
+                                <button class="edit-btn" 
+                                    data-id="<%= product.id %>" 
+                                    data-name="<%= product.product_name %>"
+                                    data-sku="<%= product.sku %>">
+                                    <i class="bx bx-edit"></i>
+                                    <span>Edit</span>
+                                </button>
+                            </td>
+                        </tr>
+                        <% }); %>
+                        <% } else { %>
+                        <tr>
+                            <td colspan="6" class="empty-msg" style="text-align: center;">ไม่พบข้อมูลสินค้าในระบบ</td>
+                        </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
