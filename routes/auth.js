@@ -5,8 +5,15 @@ const conn = require('../database');
 // หน้า login
 router.get('/login', (req, res) => {
 
+    // ถ้า login แล้ว ให้ไปหน้าตาม role
     if (req.session.user) {
-        return res.redirect('/');
+
+        if (req.session.user.role_id === 1) {
+            return res.redirect('/admin/users');
+        } else {
+            return res.redirect('/home');
+        }
+
     }
 
     res.render('login', { layout: false });
@@ -19,7 +26,7 @@ router.post('/login', (req, res) => {
     const { employee_code, password } = req.body;
 
     const sql = `
-    SELECT users.user_id, roles.role_name, employees.first_name
+    SELECT users.user_id, roles.role_id, roles.role_name, employees.first_name
     FROM users
     JOIN employees ON users.employee_id = employees.employee_id
     JOIN roles ON users.role_id = roles.role_id
@@ -43,11 +50,15 @@ router.post('/login', (req, res) => {
         req.session.user = {
             id: user.user_id,
             name: user.first_name,
-            role: user.role_name
+            role_id: user.role_id
         };
 
-        // redirect
-        res.redirect('/admin/users');
+        // redirect ตาม role
+        if (user.role_id === 1) {
+            res.redirect('/admin/users');
+        } else {
+            res.redirect('/home');
+        }
 
     });
 
@@ -62,7 +73,6 @@ router.get('/logout', (req, res) => {
             return res.send("Logout Error");
         }
 
-        // ลบ session cookie
         res.clearCookie('connect.sid');
 
         res.redirect('/login');

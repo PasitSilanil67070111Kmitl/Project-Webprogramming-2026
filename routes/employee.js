@@ -2,13 +2,15 @@ const express = require('express');
 const router = express.Router();
 const conn = require('../database');
 
-router.get('/add-employee', (req, res) => {
+const { isAdmin } = require('../middleware/authMiddleware');
+
+router.get('/add-employee', isAdmin, (req, res) => {
     res.render('employee/add_employee', {
         activePage: 'add-employee'
     });
 });
 
-router.post('/add-employee', (req, res) => {
+router.post('/add-employee', isAdmin, (req, res) => {
 
     const {
         first_name,
@@ -28,19 +30,32 @@ router.post('/add-employee', (req, res) => {
     `;
 
     conn.query(insertSql,
-        [first_name, last_name, date_of_birth, gender, phone, email, address, hire_date],
-        (err, result) => {
+    [first_name, last_name, date_of_birth, gender, phone, email, address, hire_date],
+    (err, result) => {
 
-            const newId = result.insertId;
-            const employeeCode = "EMP" + newId.toString().padStart(4, "0");
+        if (err) {
+            console.error(err);
+            return res.send("Insert Error");
+        }
 
-            conn.query(
-                "UPDATE employees SET employee_code=? WHERE employee_id=?",
-                [employeeCode, newId]
-            );
+        const newId = result.insertId;
 
-            res.redirect('/add-employee');
-        });
+        const employeeCode = "EMP" + newId.toString().padStart(4, "0");
+
+        conn.query(
+            "UPDATE employees SET employee_code=? WHERE employee_id=?",
+            [employeeCode, newId],
+            (err) => {
+
+                if (err) {
+                    console.error(err);
+                }
+
+                res.redirect('/add-employee');
+            }
+        );
+
+});
 
 });
 

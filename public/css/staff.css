@@ -516,6 +516,23 @@ main {
     display: inline-block;
 }
 
+/* Admin */
+.role-1{
+    background:#ff4d4f;
+    color:white;
+}
+/* Manager */
+.role-2{
+    background:#1890ff;
+    color:white;
+}
+/* Staff */
+.role-3{
+    background:#52c41a;
+    color:white;
+}
+
+
 .green { background-color: #28a745; }
 .red   { background-color: #dc3545; }
 .blue  { background-color: #007bff; }

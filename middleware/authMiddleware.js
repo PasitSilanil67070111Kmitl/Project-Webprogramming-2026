@@ -4,6 +4,11 @@ function isLoggedIn(req, res, next) {
         return res.redirect('/login');
     }
 
+    // ถ้าเป็นพนักงานให้ไปหน้า home
+    if (req.session.user.role_id !== 1) {
+        return res.redirect('/home');
+    }
+
     next();
 }
 
@@ -13,8 +18,13 @@ function isAdmin(req, res, next) {
         return res.redirect('/login');
     }
 
-    if (req.session.user.role !== 'admin') {
-        return res.send("Access Denied");
+    if (req.session.user.role_id !== 1) {
+        return res.send(`
+            <script>
+                alert("คุณไม่มีสิทธิ์เข้าถึงหน้านี้");
+                window.location.href = "/home";
+            </script>
+        `);
     }
 
     next();

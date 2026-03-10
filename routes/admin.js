@@ -1,9 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const conn = require('../database');
-
+const sendPasswordEmail = require('../utils/sendEmail');
 const { isAdmin } = require('../middleware/authMiddleware');
+const nodemailer = require("nodemailer");
 
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: "pasit.nicework@gmail.com",
+        pass: "ojgr oaub nbqd yxpo"
+    }
+});
 router.use(isAdmin);
 
 router.get('/users', (req, res) => {
@@ -60,14 +68,91 @@ router.post('/create-user', (req, res) => {
             return res.send("Error creating user");
         }
 
-        console.log("Generated password:", password);
+        // ดึง email พนักงาน
+        conn.query(
+            "SELECT employee_code, email FROM employees WHERE employee_id = ?",
+            [employee_id],
+            (err, result) => {
 
-        res.send(`
-            <h2>User Created</h2>
-            <p>Password: <b>${password}</b></p>
-            <a href="/admin/users">Back</a>
-        `);
+                if (err || result.length === 0) {
+                    return res.redirect('/admin/users');
+                }
 
+                const employee = result[0];
+
+                // ส่ง email
+                const mailOptions = {
+                    from: "yourgmail@gmail.com",
+                    to: employee.email,
+                    subject: "บัญชีเข้าใช้งานระบบ WMS",
+                    html: `
+                        <h2>บัญชีเข้าใช้งานระบบคลังสินค้า</h2>
+                        <p>รหัสพนักงาน: <b>${employee.employee_code}</b></p>
+                        <p>รหัสผ่าน: <b>${password}</b></p>
+                        <p>กรุณาเปลี่ยนรหัสผ่านหลังเข้าสู่ระบบ</p>
+                    `
+                };
+
+                transporter.sendMail(mailOptions, (error, info) => {
+
+                    if (error) {
+                        console.error("Email error:", error);
+                    } else {
+                        console.log("Email sent:", info.response);
+                    }
+
+                    res.send(`
+                        <script>
+                            alert("สร้างบัญชีสำเร็จ และส่งรหัสไปที่ Email แล้ว");
+                            window.location.href = "/admin/users";
+                        </script>
+                    `);
+
+                });
+
+            }
+        );
+
+    });
+
+});
+
+router.post('/update-role', (req, res) => {
+
+    const { user_id, role_id } = req.body;
+
+    const sql = `
+    UPDATE users
+    SET role_id = ?
+    WHERE user_id = ?
+    `;
+
+    conn.query(sql, [role_id, user_id], (err) => {
+
+        if (err) {
+            console.error(err);
+            return res.send("Error updating role");
+        }
+
+        res.redirect('/admin/users');
+    });
+
+});
+
+router.post('/delete-user', (req, res) => {
+
+    const { user_id } = req.body;
+
+    const sql = `DELETE FROM users WHERE user_id = ?`;
+
+    conn.query(sql, [user_id], (err) => {
+
+        if (err) {
+            console.error(err);
+            return res.send("Error deleting user");
+        }
+
+        res.redirect('/admin/users');
     });
 
 });

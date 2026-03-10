@@ -1,53 +1,50 @@
-
-        <div class="head-container">
-            <i class="bx bx-user-plus"></i>
-            <h2>Add New Employee</h2>
-        </div>
-        <div class="main-container">
-            <form action="/add-employee" method="POST">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>First Name</label>
-                    <input type="text" name="first_name" required>
-                </div>
-                <div class="form-group">
-                    <label>Last Name</label>
-                    <input type="text" name="last_name" required>
-                </div>
-                <div class="form-group">
-                    <label>Date of Birth</label>
-                    <input type="date" name="date_of_birth">
-                </div>
-                <div class="form-group">
-                    <label>Gender</label>
-                    <select name="gender">
-                        <option value="">Select</option>
-                        <option>Male</option>
-                        <option>Female</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Phone</label>
-                    <input type="text" name="phone">
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" name="email">
-                </div>
-                <div class="form-group full-width">
-                    <label>Address</label>
-                    <textarea name="address" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Hire Date</label>
-                    <input type="date" name="hire_date">
-                </div>
+<div class="head-container">
+    <i class="bx bx-user-plus"></i>
+    <h2>เพิ่มพนักงาน</h2>
+</div>
+<div class="main-container">
+    <form action="/add-employee" method="POST">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>ชื่อ</label>
+                <input type="text" name="first_name" required>
             </div>
-            <div class="form-actions">
-                <button type="submit" class="primary-btn">
-                    Save Employee
-                </button>
+            <div class="form-group">
+                <label>นามสกุล</label>
+                <input type="text" name="last_name" required>
             </div>
-        </form>
+            <div class="form-group">
+                <label>วันเกิด</label>
+                <input type="date" name="date_of_birth">
+            </div>
+            <div class="form-group">
+                <label>Gender</label>
+                <select name="gender">
+                    <option value="Male">ชาย</option>
+                    <option value="Female">หญิง</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Phone</label>
+                <input type="text" name="phone">
+            </div>
+            <div class="form-group">
+                <label>อีเมล</label>
+                <input type="email" name="email">
+            </div>
+            <div class="form-group full-width">
+                <label>ที่อยู่</label>
+                <textarea name="address" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label>วันที่เริ่มงาน</label>
+                <input type="date" name="hire_date">
+            </div>
         </div>
- 
+        <div class="form-actions">
+            <button type="submit" class="primary-btn">
+                บันทีกข้อมูลพนักงาน
+            </button>
+        </div>
+    </form>
+</div>

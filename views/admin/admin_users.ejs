@@ -1,16 +1,34 @@
+<style>
+    /* Admin */
+.role-1{
+    background:#ff4d4f;
+    color:white;
+}
+/* Manager */
+.role-2{
+    background:#1890ff;
+    color:white;
+}
+/* Staff */
+.role-3{
+    background:#52c41a;
+    color:white;
+}
+</style>
+
 <div class="head-container">
     <i class="bx bx-spanner"></i>
-    <h2>User Management</h2>
+    <h2>จัดการสิทธิ์การเข้าถึงของพนักงาน</h2>
 </div>
 <div class="create-user-box">
-    <h3>Create User from Employee</h3>
+    <h3>สร้างบัญชีสำหรับ พนักงาน</h3>
 
     <form action="/admin/create-user" method="POST" class="create-user-form">
 
         <div class="form-group">
-            <label>Select Employee</label>
+            <label>เลือกพนักงาน</label>
             <select name="employee_id" required>
-                <option value="">-- Select Employee --</option>
+                <option value="">-- เลือกพนักงาน --</option>
                 <% employees.forEach(emp=> { %>
                     <option value="<%= emp.employee_id %>">
                         <%= emp.employee_code %> - <%= emp.first_name %>
@@ -20,7 +38,7 @@
             </select>
         </div>
         <div class="form-group">
-            <label>Role</label>
+            <label>บทบาท</label>
             <select name="role_id" required>
                 <% roles.forEach(role=> { %>
                     <option value="<%= role.role_id %>">
@@ -32,7 +50,7 @@
 
         <button type="submit" class="create-btn">
             <i class="bx bx-user-plus"></i>
-            Create User
+            สร้างบัญชี
         </button>
 
     </form>
@@ -65,7 +83,7 @@
                             <%= user.email %>
                         </td>
                         <td>
-                            <span class="badge <%= user.role_name %>">
+                            <span class="badge role-<%= user.role_id %>">
                                 <%= user.role_name %>
                             </span>
                         </td>
@@ -80,7 +98,7 @@
                                         </option>
                                         <% }) %>
                                 </select>
-                                <button type="submit">Update</button>
+                                <button type="submit">แก้ไขสิทธิ์</button>
                             </form>
                         </td>
                         <td>
@@ -89,7 +107,7 @@
                                 <input type="hidden" name="user_id" value="<%= user.user_id %>">
                                 <button type="submit" class="delete-btn">
                                     <i class="bx bx-trash"></i>
-                                    <span>Delete</span>
+                                    <span>ลบบัญชี</span>
                                 </button>
                             </form>
                         </td>
