@@ -62,20 +62,25 @@ router.post('/add-product', (req, res) => {
             return res.status(500).send("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
         }
 
+        const addPrice = parseFloat(price)
+
         console.log("เพิ่มสินค้าสำเร็จ ID:", result.insertId);
 
         // --- เริ่มต้นการบันทึก LOG ---
         // 3. เตรียมข้อมูลสำหรับตาราง inventory_logs 
         // คอลัมน์: sku, product_name, action, changed_by, created_at, stock_quantity, detail
-        const logSql = `INSERT INTO product_logs (sku, product_name, action, changed_by, stock_quantity, detail, created_at) 
-                        VALUES (?, ?, ?, ?, ?, ?, NOW())`;
+        const logSql = `
+            INSERT INTO product_logs (sku, product_name, action, changed_by, stock_quantity, price, detail, created_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+        `;
         
         const logValues = [
             sku, 
             product_name, 
             'เพิ่มสินค้า',               // action
             'Staff',              // changed_by (ปรับตามระบบ login ของคุณ)
-            stock_quantity, 
+            stock_quantity,
+            addPrice,
             'เพิ่มสินค้าใหม่เข้าระบบ'    // detail
         ];
 
@@ -94,70 +99,54 @@ router.post('/add-product', (req, res) => {
 
 router.post('/update-product', (req, res) => {
     // 1. รับค่าจาก Modal
-    const { sku, action, quantity_change, price, detail } = req.body;
-    const qtyChange = parseInt(quantity_change) || 0;
-
-    // --- ส่วนที่เพิ่มเข้ามา: ดึงชื่อสินค้าจาก Database ---
-    const sqlGetName = "SELECT product_name FROM products WHERE sku = ?";
+    const { sku, name, action, quantity_change, price, detail } = req.body;
     
-    conn.query(sqlGetName, [sku], (err, results) => {
-        if (err || results.length === 0) {
-            console.error("Fetch Name Error:", err);
-            return res.status(500).send("ไม่พบข้อมูลสินค้าชิ้นนี้");
+    // แปลงค่าให้เป็นตัวเลขเพื่อป้องกัน Error 1366 (รูป image_6d3e8c.png)
+    const qtyChange = parseInt(quantity_change) || 0;
+    const finalPrice = parseFloat(price) || 0;
+
+    // 2. เตรียม Logic การอัปเดตสต็อก
+    let stockLogic = "stock_quantity";
+    let actionText = "ปรับปรุงข้อมูล";
+
+    if (action === 'add_stock') {
+        stockLogic = `stock_quantity + ${qtyChange}`;
+        actionText = "เพิ่มสต็อกสินค้า";
+    } else if (action === 'withdraw') {
+        stockLogic = `stock_quantity - ${qtyChange}`;
+        actionText = "เบิกสินค้า";
+    }
+
+    // 3. อัปเดตตาราง products (อัปเดตสต็อกและราคาปัจจุบัน)
+    const sqlUpdate = `UPDATE products SET stock_quantity = ${stockLogic}, price = ? WHERE sku = ?`;
+
+    conn.query(sqlUpdate, [finalPrice, sku], (err) => {
+        if (err) {
+            console.error("Update Error:", err);
+            return res.status(500).send("ไม่สามารถอัปเดตสินค้าได้");
         }
 
-        // เก็บชื่อสินค้าที่ได้จาก DB ไว้ในตัวแปร
-        const productNameFromDB = results[0].product_name;
-
-        // 2. เตรียม Logic สำหรับการอัปเดตสต็อก
-        let stockLogic = "stock_quantity";
-        let actionText = "ปรับปรุงข้อมูล";
-
-        if (action === 'add_stock') {
-            stockLogic = `stock_quantity + ${qtyChange}`;
-            actionText = "เพิ่มสต็อกสินค้า";
-        } else if (action === 'withdraw') {
-            stockLogic = `stock_quantity - ${qtyChange}`;
-            actionText = "เบิกสินค้า";
-        }
-
-        // 3. รันคำสั่ง UPDATE ตาราง products
-        const sqlUpdate = `
-            UPDATE products 
-            SET stock_quantity = ${stockLogic}, 
-                price = ? 
-            WHERE sku = ?
+        // --- เพิ่มการบันทึก PRICE ลงใน LOG ---
+        // 4. บันทึกลงตาราง product_logs (เพิ่มคอลัมน์ price)
+        const logSql = `
+            INSERT INTO product_logs (sku, product_name, action, changed_by, stock_quantity, price, detail, created_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
         `;
 
-        conn.query(sqlUpdate, [price, sku], (updErr, result) => {
-            if (updErr) {
-                console.error("Update Error:", updErr);
-                return res.status(500).send("ไม่สามารถอัปเดตสินค้าได้");
-            }
+        const logValues = [
+            sku, 
+            name, 
+            `${actionText}`, 
+            'Staff', 
+            qtyChange, 
+            finalPrice, // บันทึกราคาลงใน log ด้วย
+            detail
+        ];
 
-            // 4. บันทึกลงตาราง product_logs (ใช้ productNameFromDB ที่ดึงมาได้)
-            const logSql = `
-                INSERT INTO product_logs (sku, product_name, action, changed_by, stock_quantity, detail, created_at, price) 
-                VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)
-            `;
-
-            const logValues = [
-                sku,
-                productNameFromDB, // ใช้ชื่อจาก Database แทนการรับจาก Body
-                `${actionText}`, 
-                'Staff',                    
-                qtyChange,                     
-                detail,
-                price                    
-            ];
-
-            conn.query(logSql, logValues, (logErr) => {
-                if (logErr) {
-                    console.error("Log Error:", logErr);
-                }
-                // 5. สำเร็จแล้วกลับไปหน้า Inventory
-                res.redirect('inventory');
-            });
+        conn.query(logSql, logValues, (logErr) => {
+            if (logErr) console.error("Log Error:", logErr);
+            // 5. สำเร็จแล้วกลับไปหน้า Inventory
+            res.redirect('/inventory');
         });
     });
 });
