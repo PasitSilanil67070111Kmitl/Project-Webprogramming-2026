@@ -112,7 +112,34 @@ main {
     box-shadow: 0 0 15px 1px #afafaf;
 }
 
-/* Manage Users Table*/
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.dashboard-cards .card-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.dashboard-cards .card-link .card {
+    padding: 20px;
+    border-left: 5px solid #2ecc71;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.dashboard-cards .card-link .card .link {
+    color: #2ecc71;
+    font-weight: bold;
+}
+
+.dashboard-cards .card-link .card:hover {
+    background: #e1ffed;
+}
+
 .table-container {
     margin-top: 12px;
 }
@@ -155,6 +182,9 @@ main {
 }
 
 .table-container .edit-btn {
+    display: flex;
+    align-items: center;
+    gap: 2px;
     padding: 8px 12px;
     background-color: #d67f1a;
     color: white;
@@ -163,8 +193,24 @@ main {
     cursor: pointer;
 }
 
+.table-container .remove-btn {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 12px;
+    background-color: #d61a1a;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
 .table-container .edit-btn:hover {
     background-color: #a05e14;
+}
+
+.table-container .remove-btn:hover {
+    background-color: #8d0f0f;
 }
 
 .form-grid {
@@ -222,7 +268,7 @@ main {
     background-color: #1b4f72;
 }
 
-/* Products */
+/* Inventory */
 .main-container .head {
     display: flex;
     justify-content: space-between;
@@ -253,10 +299,34 @@ main {
     background-color: #1b4f72;
 }
 
+.main-container .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    font-size: 20px;
+}
+
+.main-container .pagination a {
+    display: flex;
+    align-items: center;
+    align-self: center;
+    text-decoration: none;
+    font-size: 26px;
+    color: #fff;
+    padding: 0 12px;
+    background-color: #007bff;
+    border-radius: 12px;
+}
+
 /* searchbar */
+.from-searchbar {
+    width: 650px;
+}
+
 .searchbar {
     display: flex;
-    align-self: center;
     border-radius: 12px;
     border: 2px solid #dfdfdf;
     padding: 4px;
@@ -272,6 +342,20 @@ main {
     padding: 4px;
     border: none;
     outline: none;
+    width: 100%;
+}
+
+.searchbar .search-btn-group {
+    width: 100%;
+    display: flex;
+    gap: 2px;
+}
+
+.searchbar .clear-search-btn {
+    width: 65px;
+    align-self: center;
+    text-decoration: none;
+    color: #666;
 }
 
 .searchbar button {
@@ -358,9 +442,42 @@ main {
 }
 
 .modal .close-edit,
-.modal .close-add {
+.modal .close-add,
+.modal .close-remove {
     font-size: 24px;
     cursor: pointer;
+}
+
+.modal .remove-btn-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px
+}
+
+.modal .remove-btn-group button {
+    font-size: 20px;
+    padding: 12px;
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+}
+
+.modal .remove-btn-group .btn-cancel {
+    background-color: #f7f7f7;
+    color: #007bff;
+}
+
+.modal .remove-btn-group .btn-confirm-remove {
+    background-color:#007bff;
+    color: #fff;
+}
+
+.modal .remove-btn-group .btn-confirm-remove:hover {
+    background-color: #1b4f72;
+}
+
+.modal .remove-btn-group .btn-cancel:hover {
+    background-color: #d6d6d6;
 }
 
 /* Logs */
@@ -403,6 +520,7 @@ main {
 .red   { background-color: #dc3545; }
 .blue  { background-color: #007bff; }
 .orange  { background-color: #ee7b0f; }
+.gray { background-color: #b8b8b8; }
 
 .empty-msg {
     color: #888;

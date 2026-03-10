@@ -3,45 +3,77 @@ const router = express.Router();
 const conn = require('../database');
 
 router.get('/home', (req, res) => {
-    res.render('./staff/staff_home', 
-    { layout: 'layouts/staff_main', activePage: 'home'});
-});
+    // ดึง Logs ล่าสุด 5 รายการ
+    const sqlLogs = `SELECT * FROM product_logs ORDER BY created_at DESC LIMIT 5`;
 
-router.get('/inventory', (req, res) => {
-    const search = req.query.search || ''; 
-
-    // 1. แก้ไข: เพิ่ม p หลัง products และ c หลัง categories เพื่อทำ Alias
-    let sql = `
-        SELECT p.*, c.category_name 
-        FROM products p
-        LEFT JOIN categories c ON p.category_id = c.id
-    `;
-
-    const params = [];
-
-    // 2. ตรวจสอบเงื่อนไขการค้นหา
-    if (search !== '') {
-        sql += ` WHERE p.product_name LIKE ? OR p.sku LIKE ?`;
-        params.push(`%${search}%`, `%${search}%`);
-    }
-
-    // 3. แก้ไข: เพิ่ม params เข้าไปในฟังก์ชัน query
-    conn.query(sql, params, (err, result) => { 
+    conn.query(sqlLogs, (err, logResults) => {
         if (err) {
             console.error(err);
             return res.status(500).send("Database Error");
         }
 
-        const sqlCat = "SELECT * FROM categories";
-        conn.query(sqlCat, (err, catResult) => {
-            if (err) return res.status(500).send(err);
+        res.render('./staff/staff_home', { 
+            latestLogs: logResults,
+            layout: 'layouts/staff_main', 
+            activePage: 'home' 
+        });
+    });
+});
 
-            res.render('./staff/inventory', { 
-                allProducts: result,
-                allCategories: catResult, 
-                searchQuery: search,
-                layout: 'layouts/staff_main', 
-                activePage: 'inventory'
+router.get('/inventory', (req, res) => {
+    const search = req.query.search || ''; 
+    const itemsPerPage = 12; 
+    const currentPage = parseInt(req.query.page) || 1;
+    const offset = (currentPage - 1) * itemsPerPage;
+
+    // 1. นับจำนวนสินค้าที่ตรงตามเงื่อนไข (ต้องมีสต็อก และ ตรงกับคำค้นหา)
+    let countSql = `SELECT COUNT(*) as total FROM products WHERE stock_quantity > 0`;
+    const countParams = [];
+
+    if (search !== '') {
+        countSql += ` AND (product_name LIKE ? OR sku LIKE ?)`;
+        countParams.push(`%${search}%`, `%${search}%`);
+    }
+
+    conn.query(countSql, countParams, (err, countResult) => {
+        if (err) return res.status(500).send("Error counting products");
+
+        const totalItems = countResult[0].total;
+        const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+        // 2. ดึงข้อมูลสินค้าแบบ Join พร้อมคำสั่ง LIMIT สำหรับ Pagination
+        let sql = `
+            SELECT p.*, c.category_name 
+            FROM products p
+            LEFT JOIN categories c ON p.category_id = c.id
+            WHERE p.stock_quantity > 0
+        `;
+
+        const params = [];
+        if (search !== '') {
+            sql += ` AND (p.product_name LIKE ? OR p.sku LIKE ?)`;
+            params.push(`%${search}%`, `%${search}%`);
+        }
+
+        sql += ` ORDER BY p.id ASC LIMIT ? OFFSET ?`;
+        params.push(itemsPerPage, offset);
+
+        conn.query(sql, params, (err, productResult) => {
+            if (err) return res.status(500).send("Database Error");
+
+            const sqlCat = "SELECT * FROM categories";
+            conn.query(sqlCat, (err, catResult) => {
+                if (err) return res.status(500).send(err);
+
+                res.render('./staff/inventory', { 
+                    allProducts: productResult,
+                    allCategories: catResult, 
+                    searchQuery: search, // ส่งคำค้นหากลับไปที่ Input
+                    currentPage: currentPage,
+                    totalPages: totalPages,
+                    layout: 'layouts/staff_main', 
+                    activePage: 'inventory'
+                });
             });
         });
     });
@@ -98,70 +130,133 @@ router.post('/add-product', (req, res) => {
 });
 
 router.post('/update-product', (req, res) => {
-    // 1. รับค่าจาก Modal
     const { sku, name, action, quantity_change, price, detail } = req.body;
     
-    // แปลงค่าให้เป็นตัวเลขเพื่อป้องกัน Error 1366 (รูป image_6d3e8c.png)
     const qtyChange = parseInt(quantity_change) || 0;
-    const finalPrice = parseFloat(price) || 0;
+    const inputPrice = parseFloat(price); // รับค่ามาก่อน (ยังไม่ใส่ || 0)
 
-    // 2. เตรียม Logic การอัปเดตสต็อก
     let stockLogic = "stock_quantity";
     let actionText = "ปรับปรุงข้อมูล";
+    let updateFields = "price = ?"; // SQL ส่วนที่จะ Update
+    let updateValues = [];
 
+    // 2. แยก Logic ตามประเภท Action
     if (action === 'add_stock') {
         stockLogic = `stock_quantity + ${qtyChange}`;
         actionText = "เพิ่มสต็อกสินค้า";
+        // กรณีเพิ่มสต็อกอย่างเดียว: ไม่ต้องแก้ราคา (ดึงราคาเดิมจาก DB มาใช้ใน LOG)
+        updateFields = "stock_quantity = " + stockLogic; 
     } else if (action === 'withdraw') {
         stockLogic = `stock_quantity - ${qtyChange}`;
         actionText = "เบิกสินค้า";
+        updateFields = "stock_quantity = " + stockLogic;
+    } else if (action === 'update_info') {
+        // กรณีแก้ไขข้อมูล: ให้ Update ทั้งสต็อก (ถ้ากรอก) และราคา
+        stockLogic = `stock_quantity + ${qtyChange}`;
+        updateFields = `stock_quantity = ${stockLogic}, price = ?`;
+        updateValues.push(inputPrice || 0); // ใส่ราคาใหม่
     }
 
-    // 3. อัปเดตตาราง products (อัปเดตสต็อกและราคาปัจจุบัน)
-    const sqlUpdate = `UPDATE products SET stock_quantity = ${stockLogic}, price = ? WHERE sku = ?`;
+    // 3. อัปเดตตาราง products
+    // ใช้ SQL แบบไดนามิกตามประเภท action
+    const sqlUpdate = `UPDATE products SET ${updateFields} WHERE sku = ?`;
+    updateValues.push(sku);
 
-    conn.query(sqlUpdate, [finalPrice, sku], (err) => {
+    conn.query(sqlUpdate, updateValues, (err) => {
         if (err) {
             console.error("Update Error:", err);
             return res.status(500).send("ไม่สามารถอัปเดตสินค้าได้");
         }
 
-        // --- เพิ่มการบันทึก PRICE ลงใน LOG ---
-        // 4. บันทึกลงตาราง product_logs (เพิ่มคอลัมน์ price)
-        const logSql = `
-            INSERT INTO product_logs (sku, product_name, action, changed_by, stock_quantity, price, detail, created_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
-        `;
+        // 4. บันทึกลงตาราง product_logs
+        // หมายเหตุ: ตรงนี้เราต้องหาว่าราคาล่าสุดคือเท่าไหร่เพื่อลง Log ให้ถูกต้อง
+        // ดึงราคาปัจจุบันมาลง Log เผื่อกรณีที่เราไม่ได้ Update ราคาในครั้งนี้
+        const sqlGetPrice = "SELECT price FROM products WHERE sku = ?";
+        conn.query(sqlGetPrice, [sku], (err, priceResult) => {
+            const currentPrice = priceResult[0] ? priceResult[0].price : 0;
 
-        const logValues = [
-            sku, 
-            name, 
-            `${actionText}`, 
-            'Staff', 
-            qtyChange, 
-            finalPrice, // บันทึกราคาลงใน log ด้วย
-            detail
-        ];
+            const logSql = `
+                INSERT INTO product_logs (sku, product_name, action, changed_by, stock_quantity, price, detail, created_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+            `;
 
-        conn.query(logSql, logValues, (logErr) => {
-            if (logErr) console.error("Log Error:", logErr);
-            // 5. สำเร็จแล้วกลับไปหน้า Inventory
+            const logValues = [sku, name, actionText, 'Staff', qtyChange, currentPrice, detail];
+
+            conn.query(logSql, logValues, (logErr) => {
+                if (logErr) console.error("Log Error:", logErr);
+                res.redirect('/inventory');
+            });
+        });
+    });
+});
+
+router.post('/remove-product', (req, res) => {
+    const { id, sku, name } = req.body;
+    
+    // ลบสินค้า
+    const sqlDelete = "DELETE FROM products WHERE id = ?";
+    conn.query(sqlDelete, [id], (err) => {
+        if (err) return res.status(500).send("Delete Error");
+
+        // บันทึก Log การลบ (ตามโครงสร้าง image_066334.png)
+        const sqlLog = `INSERT INTO product_logs (sku, product_name, action, changed_by, stock_quantity, detail) 
+                        VALUES (?, ?, ?, ?, ?, ?)`;
+        
+        conn.query(sqlLog, [sku, name, 'ลบสินค้า', 'Staff', 0, 'ลบข้อมูลออกจากคลัง'], (logErr) => {
             res.redirect('/inventory');
         });
     });
 });
 
 router.get('/inventory-logs', (req, res) => {
-    const sql = `SELECT * FROM product_logs ORDER BY created_at DESC`;
-    
-    conn.query(sql, (err, results) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).send("เกิดข้อผิดพลาดในการดึง Log");
+    const search = req.query.search || ''; 
+    const itemsPerPage = 12; 
+    const currentPage = parseInt(req.query.page) || 1;
+    const offset = (currentPage - 1) * itemsPerPage;
+
+    // 1. นับจำนวน Log ทั้งหมดที่ตรงตามเงื่อนไขการค้นหา
+    let countSql = `SELECT COUNT(*) as total FROM product_logs`;
+    const countParams = [];
+
+    if (search !== '') {
+        // ค้นหาจาก SKU, ชื่อสินค้า หรือ ประเภทการกระทำ (Action)
+        countSql += ` WHERE sku LIKE ? OR product_name LIKE ? OR action LIKE ?`;
+        countParams.push(`%${search}%`, `%${search}%`, `%${search}%`);
+    }
+
+    conn.query(countSql, countParams, (err, countResult) => {
+        if (err) return res.status(500).send("Error counting logs");
+
+        const totalItems = countResult[0].total;
+        const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+        // 2. ดึงข้อมูล Log ตามหน้า และเงื่อนไขการค้นหา
+        let sql = `SELECT * FROM product_logs`;
+        const params = [];
+
+        if (search !== '') {
+            sql += ` WHERE sku LIKE ? OR product_name LIKE ? OR action LIKE ?`;
+            params.push(`%${search}%`, `%${search}%`, `%${search}%`);
         }
-        // ส่งข้อมูลไปที่หน้า ejs
-        res.render('./staff/inventory-logs', 
-        { logs: results, layout: 'layouts/staff_main', activePage: 'inventory-logs'});
+
+        sql += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+        params.push(itemsPerPage, offset);
+
+        conn.query(sql, params, (err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send("เกิดข้อผิดพลาดในการดึง Log");
+            }
+            
+            res.render('./staff/inventory-logs', { 
+                logs: results, 
+                currentPage: currentPage, 
+                totalPages: totalPages,
+                searchQuery: search, // ส่งค่าค้นหากลับไปที่ช่อง Input
+                layout: 'layouts/staff_main', 
+                activePage: 'inventory-logs'
+            });
+        });
     });
 });
 

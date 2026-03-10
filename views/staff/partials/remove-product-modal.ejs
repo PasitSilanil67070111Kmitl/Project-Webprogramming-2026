@@ -1,0 +1,23 @@
+                <div id="removeModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-head">
+                            <h2>ลบข้อมูลสินค้า</h2>
+                            <span class="close-remove">&times;</span>
+                        </div>
+                        <form action="/remove-product" method="POST">
+                            <div class="modal-body">
+                                <h3>คุณแน่ใจหรือไม่ที่จะลบสินค้าชิ้นนี้?</h3>
+                                <h2 id="remove-display-name"></h2>
+                                <h3><small class="text-muted">SKU: </small><small id="remove-display-sku"></small></h3>
+                                <input type="hidden" name="id" id="remove-id"> 
+                                <input type="hidden" name="name" id="remove-name">
+                                <input type="hidden" name="sku" id="remove-sku">
+                                
+                                <div class="remove-btn-group">
+                                <button type="button" class="btn-cancel" id="cancelRemove">ยกเลิก</button>
+                                <button type="submit" class="btn-confirm-remove">ยืนยัน</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>

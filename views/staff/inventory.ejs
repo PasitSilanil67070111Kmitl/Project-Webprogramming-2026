@@ -1,20 +1,23 @@
         <div class="head-container">
             <i class="bx bx-package"></i>
-            <h2>Inventory</h2>
+            <h2>คลังสินค้า</h2>
         </div>
         <div class="main-container">
-            <h2>Products list</h2>
+            <h2>รายการสินค้า</h2>
             <div class="head">
                 <form action="/inventory" method="GET" class="from-searchbar">
                     <div class="searchbar">
                         <i class="bx bx-search"></i>
-                        <input type="text" name="query" placeholder="ระบุคำที่ต้องการค้นหา">
+                        <input type="text" name="search" placeholder="ระบุคำที่ต้องการค้นหา" value="<%= searchQuery %>">
+                            <% if (searchQuery) { %>
+                                <a href="/inventory" class="clear-search-btn">ล้างค่า</a>
+                            <% } %>
                         <button type="submit">ค้นหา</button>
                     </div>
                 </form>
                 <button id="openAddModalBtn" class="primary-btn">
                     <i class="bx bx-plus"></i>
-                    <span>Add Product</span>
+                    <span>เพิ่มสินค้า</span>
                 </button>
 
                 <!-- Modal สำหรับเพิ่มสินค้า  -->
@@ -23,48 +26,70 @@
                 <!-- Modal สำหรับแก้ไขสินค้า-->
                 <%- include('partials/edit-product-modal') %>
 
+                <!-- Modal สำหรับยืนยันการลบสินค้า-->
+                <%- include('partials/remove-product-modal') %>
+                
             </div>
             <hr>
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th width="5%">ID</th>
                             <th width="10%">SKU</th>
                             <th>Product Name</th>
                             <th width="10%">Category</th>
                             <th width="10%">Quantity</th>
                             <th width="10%">Price</th>
-                            <th width="10%"></th>
+                            <th width="12%"></th>
                         </tr>
                     </thead>
                     <tbody>
                         <% if (allProducts && allProducts.length > 0) { %>
-                        <% allProducts.forEach(function(product) { %>
-                        <tr>
-                            <td><%= product.id  %></td>
-                            <td><%= product.sku %></td>
-                            <td><%= product.product_name %></td>
-                            <td><%= product.category_name %></td>
-                            <td><%= product.stock_quantity %></td>
-                            <td><%= Number(product.price).toLocaleString('en-US', { minimumFractionDigits: 2 }) %></td>
-                            <td>
-                                <button class="edit-btn" 
-                                    data-id="<%= product.id %>" 
-                                    data-name="<%= product.product_name %>"
-                                    data-sku="<%= product.sku %>">
-                                    <i class="bx bx-edit"></i>
-                                    <span>Edit</span>
-                                </button>
-                            </td>
-                        </tr>
-                        <% }); %>
+                            <% allProducts.forEach(function(product) { %>
+                                <tr>
+                                    <td><%= product.sku %></td>
+                                    <td><%= product.product_name %></td>
+                                    <td><%= product.category_name %></td>
+                                    <td><%= product.stock_quantity %></td>
+                                    <td><%= Number(product.price).toLocaleString('en-US', { minimumFractionDigits: 2 }) %></td>
+                                    <td>
+                                        <div class="button-group" style="display: flex; gap: 12px">
+                                            <button class="edit-btn" 
+                                                data-id="<%= product.id %>" 
+                                                data-name="<%= product.product_name %>"
+                                                data-sku="<%= product.sku %>"
+                                                data-price="<%= product.price %>">
+                                                <i class="bx bx-edit"></i>
+                                                <span>แก้ไข</span>
+                                            </button>
+                                            <button class="remove-btn"
+                                                data-id="<%= product.id %>" 
+                                                data-name="<%= product.product_name %>"
+                                                data-sku="<%= product.sku %>"> 
+                                                <i class="bx bx-trash"></i>
+                                                <span>ลบ</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }); %>
                         <% } else { %>
-                        <tr>
-                            <td colspan="6" class="empty-msg" style="text-align: center;">ไม่พบข้อมูลสินค้าในระบบ</td>
-                        </tr>
+                            <tr>
+                                <td colspan="7" class="empty-msg" style="text-align: center;">ไม่พบข้อมูลสินค้าที่มีในคลัง</td>
+                            </tr>
                         <% } %>
                     </tbody>
                 </table>
+                <div class="pagination">
+                    <% if (currentPage > 1) { %>
+                    <a href="?page=<%= currentPage - 1 %>&search=<%= searchQuery %>" class="btn-page"><i class="bx bx-chevron-left"></i></a>
+                    <% } %>
+
+                    <span class="page-info">หน้า <%= currentPage %> จาก <%= totalPages %></span>
+
+                    <% if (currentPage < totalPages) { %>
+                    <a href="?page=<%= currentPage + 1 %>&search=<%= searchQuery %>" class="btn-page"><i class="bx bx-chevron-right"></i></a>
+                    <% } %>
+                </div>
             </div>
         </div>

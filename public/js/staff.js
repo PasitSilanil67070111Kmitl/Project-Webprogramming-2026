@@ -38,6 +38,7 @@ const priceSection = document.getElementById('price-section');
 // ฟังก์ชันสำหรับสลับการแสดงผล
 function toggleInputs() {
     const action = actionSelect.value;
+    const price = this.getAttribute("data-price");
 
     if (action === 'update_info') {
         // ถ้าเลือกปรับปรุงข้อมูล -> โชว์ราคา ซ่อนจำนวน
@@ -47,6 +48,7 @@ function toggleInputs() {
         // ถ้าเลือกเพิ่ม/เบิกสต็อก -> โชว์จำนวน ซ่อนราคา
         qtySection.style.display = 'flex';
         priceSection.style.display = 'none';
+        document.querySelector('input[name="price"]').value = price;
     }
 }
 
@@ -59,3 +61,40 @@ editBtns.forEach(btn => {
         toggleInputs(); // รันฟังก์ชันเพื่อตั้งค่าเริ่มต้นให้ Modal
     });
 });
+
+// ลบข้อมูลสินค้า
+// 1. เลือก Element ของ Remove Modal
+const removeModal = document.getElementById("removeModal");
+const removeBtns = document.querySelectorAll(".remove-btn");
+const closeRemove = document.querySelector(".close-remove");
+const cancelRemove = document.getElementById("cancelRemove");
+
+// 2. เมื่อกดปุ่ม Remove ในตาราง
+removeBtns.forEach(btn => {
+    btn.onclick = function() {
+        // ดึงข้อมูลจาก attribute ของปุ่มที่กด
+        const id = this.getAttribute("data-id");
+        const name = this.getAttribute("data-name");
+        const sku = this.getAttribute("data-sku");
+
+        // นำข้อมูลไปใส่ใน Input ของ Modal (เพื่อให้ Submit ไปที่ Server ได้)
+        document.getElementById("remove-id").value = id;
+        document.getElementById("remove-sku").value = sku;
+        document.getElementById("remove-name").value = name;
+        
+        // แสดงชื่อสินค้าบน Modal ให้ User ตรวจสอบ
+        document.getElementById("remove-display-name").innerText = name;
+        document.getElementById("remove-display-sku").innerText = sku;
+
+        // แสดง Modal ขึ้นมา
+        removeModal.style.display = "flex";
+    };
+});
+
+// 3. จัดการการปิด Modal
+const hideRemoveModal = () => {
+    removeModal.style.display = "none";
+};
+
+if(closeRemove) closeRemove.onclick = hideRemoveModal;
+if(cancelRemove) cancelRemove.onclick = hideRemoveModal;

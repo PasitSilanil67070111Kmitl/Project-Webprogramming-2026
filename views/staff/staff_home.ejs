@@ -1,7 +1,65 @@
         <div class="head-container">
             <i class="bx bx-home-alt-2"></i>
-            <h2>Home</h2>
+            <h2>หน้าหลัก</h2>
         </div>
         <div class="main-container">
-            <img style="display: flex; justify-self: center;" src="https://www.consafelogistics.com/hs-fs/hubfs/Website/Blogs/What%20is%20warehouse%20mamanagment%20system/wms-circle.png?width=2880&height=2048&name=wms-circle.png" alt="temp" width="60%">
+            <h2><i class='bx bx-history'></i> รายการล่าสุด (Recent Logs)</h2>
+                <div class="table-container" style="margin-bottom: 30px;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Product Name</th>
+                                <th>Action</th>
+                                <th>Date-Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (latestLogs && latestLogs.length > 0) { %>
+                                <% latestLogs.forEach(log => { %>
+                                    <tr>
+                                        <td><%= log.sku %></td>
+                                        <td><%= log.product_name %></td>
+                                        <td>
+                                            <% 
+                                                let badgeClass = '';
+                                                if (log.action === 'เพิ่มสินค้า') badgeClass = 'green';
+                                                else if (log.action === 'เบิกสินค้า') badgeClass = 'red';
+                                                else if (log.action === 'เพิ่มสต็อกสินค้า') badgeClass = 'blue'
+                                                else if (log.action === 'ปรับปรุงข้อมูล') badgeClass = 'orange'
+                                                else if (log.action === 'ลบสินค้า') badgeClass = 'gray';
+                                            %>
+                                            <span class="badge <%= badgeClass %>">
+                                                <%= log.action %>
+                                            </span>
+                                        </td>
+                                        <td><%= new Date(log.created_at).toLocaleString('th-TH') %></td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="4" style="text-align: center;">ไม่มีรายการเคลื่อนไหวล่าสุด</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="dashboard-cards" >
+                    <a href="/inventory" class="card-link">
+                        <div class="card">
+                            <h3><i class='bx bx-package'></i> จัดการสต็อกสินค้า</h3>
+                            <p>ดูรายการสินค้าทั้งหมด เพิ่ม หรือแก้ไขจำนวนสต็อก</p>
+                            <span class="link">ไปที่หน้า Inventory &rarr;</span>
+                        </div>
+                    </a>
+
+                    <a href="/inventory-logs" class="card-link">
+                        <div class="card">
+                            <h3><i class="bx bx-history"></i> ประวัติการทำรายการ</h3>
+                            <p>ตรวจสอบประวัติสินค้าทั้งหมดในระบบ</p>
+                            <span class="link">ไปที่หน้า Inventory Logs &rarr;</span>
+                        </div>
+                    </a>
+                </div>
         </div>

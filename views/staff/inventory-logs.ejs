@@ -1,14 +1,17 @@
         <div class="head-container">
             <i class="bx bx-history"></i>
-            <h2>Inventory Logs</h2>
+            <h2>บันทึกสินค้า</h2>
         </div>
         <div class="main-container">
-            <h2>Inventory Logs List</h2>
+            <h2>รายการบันทึกบันทึกสินค้าคงคลัง</h2>
             <div class="head">
-                <form action="/inventory" method="GET" class="from-searchbar">
+                <form action="/inventory-logs" method="GET" class="from-searchbar">
                     <div class="searchbar">
                         <i class="bx bx-search"></i>
-                        <input type="text" name="query" placeholder="ระบุคำที่ต้องการค้นหา">
+                        <input type="text" name="search" placeholder="ระบุคำที่ต้องการค้นหา" value="<%= searchQuery %>">
+                            <% if (searchQuery) { %>
+                                <a href="/inventory-logs" class="clear-search-btn">ล้างค่า</a>
+                            <% } %>
                         <button type="submit">ค้นหา</button>
                     </div>
                 </form>
@@ -28,7 +31,7 @@
                             <th width="10%">By</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="logsTableBody">
                         <% if (logs && logs.length > 0) { %>
                             <% logs.forEach(function(log) { %>
                             <tr>
@@ -41,7 +44,8 @@
                                         if (log.action === 'เพิ่มสินค้า') badgeClass = 'green';
                                         else if (log.action === 'เบิกสินค้า') badgeClass = 'red';
                                         else if (log.action === 'เพิ่มสต็อกสินค้า') badgeClass = 'blue'
-                                        else if (log.action === 'ปรับปรุงข้อมูล') badgeClass = 'orange';
+                                        else if (log.action === 'ปรับปรุงข้อมูล') badgeClass = 'orange'
+                                        else if (log.action === 'ลบสินค้า') badgeClass = 'gray';
                                     %>
                                     <span class="badge <%= badgeClass %>">
                                         <%= log.action %>
@@ -82,5 +86,16 @@
                         <% } %>
                     </tbody>
                 </table>
+                <div class="pagination">
+                    <% if (currentPage > 1) { %>
+                    <a href="?page=<%= currentPage - 1 %>&search=<%= searchQuery %>" class="btn-page"><i class="bx bx-chevron-left"></i></a>
+                    <% } %>
+
+                    <span class="page-info">หน้า <%= currentPage %> จาก <%= totalPages %></span>
+
+                    <% if (currentPage < totalPages) { %>
+                    <a href="?page=<%= currentPage + 1 %>&search=<%= searchQuery %>" class="btn-page"><i class="bx bx-chevron-right"></i></a>
+                    <% } %>
+                </div>
             </div>
         </div>
