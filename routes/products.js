@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const conn = require('../database');
-
+const { isLoggedIn } = require('../middleware/authMiddleware');
+router.use(isLoggedIn);
 router.get('/home', (req, res) => {
     // ดึง Logs ล่าสุด 5 รายการ
     const sqlLogs = `SELECT * FROM product_logs ORDER BY created_at DESC LIMIT 5`;

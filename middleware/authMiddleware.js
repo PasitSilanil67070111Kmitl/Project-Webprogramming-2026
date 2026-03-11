@@ -4,9 +4,11 @@ function isLoggedIn(req, res, next) {
         return res.redirect('/login');
     }
 
-    // ถ้าเป็นพนักงานให้ไปหน้า home
-    if (req.session.user.role_id !== 1) {
-        return res.redirect('/home');
+    const role = req.session.user.role_id;
+
+    // Manager เข้าได้เฉพาะหน้า inventory-logs
+    if (role === 2 && req.path !== '/inventory-logs') {
+        return res.redirect('/inventory-logs');
     }
 
     next();
